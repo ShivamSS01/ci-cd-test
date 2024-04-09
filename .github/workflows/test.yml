@@ -19,8 +19,8 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Install @octokit/rest
-        run: npm install @octokit/rest
+      - name: Install @octokit/rest and node-fetch
+        run: npm install @octokit/rest node-fetch
 
       - name: Create Pull Request
         uses: actions/github-script@v5
@@ -28,7 +28,11 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { Octokit } = require('@octokit/rest');
-            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+            const fetch = require('node-fetch'); // Require node-fetch package for fetch implementation
+            const octokit = new Octokit({ 
+              auth: process.env.GITHUB_TOKEN,
+              request: { fetch } // Pass fetch implementation to Octokit constructor
+            });
 
             async function createPullRequest() {
               try {
@@ -60,3 +64,4 @@ jobs:
         env:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+``
