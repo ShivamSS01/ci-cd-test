@@ -10,10 +10,23 @@ jobs:
     runs-on: ubuntu-latest
  
     steps:
+      - name: Check if PR exists
+        id: check
+        run: |
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+              --json baseRefName,headRefName \
+              --jq '
+                  map(select(.baseRefName == "qa" and .headRefName == "dev"))
+                  | length
+              ')
+          if ((prs > 0)); then
+              echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
  
       - name: Create pull request
+        if: steps.check.outputs.skip != 'true'
         uses: actions/github-script@v6
         with:
           script: |
