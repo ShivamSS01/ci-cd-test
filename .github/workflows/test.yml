@@ -19,6 +19,9 @@ jobs:
         with:
           node-version: '14'
 
+      - name: Install @octokit/rest
+        run: npm install @octokit/rest
+
       - name: Create Pull Request
         uses: actions/github-script@v5
         with:
