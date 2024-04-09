@@ -67,4 +67,4 @@ jobs:
 
       - name: Deploy changes
 
-        run: sfdx force:source:deploy -p Jungly/force-app/main/default -u ${{ secrets.SF_CICD_USERNAME }} --json --checkonly
+        run: sfdx force:source:deploy -p ZOO/force-app/main/default -u ${{ secrets.SF_CICD_USERNAME }} --json --checkonly
