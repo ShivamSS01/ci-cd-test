@@ -19,33 +19,41 @@ jobs:
         with:
           node-version: '14'
 
-      - name: Install Octokit/rest.js
-        run: npm install @octokit/rest
-
       - name: Create Pull Request
-        run: |
-          const { Octokit } = require('@octokit/rest');
-          const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const { Octokit } = require('@octokit/rest');
+            const octokit = new Octokit({ auth: process.env.GITHUB_TOKEN });
 
-          const { data: branches } = await octokit.repos.listBranches({
-            owner: process.env.GITHUB_REPOSITORY_OWNER,
-            repo: process.env.GITHUB_REPOSITORY,
-          });
+            async function createPullRequest() {
+              try {
+                const { data: branches } = await octokit.repos.listBranches({
+                  owner: process.env.GITHUB_REPOSITORY_OWNER,
+                  repo: process.env.GITHUB_REPOSITORY,
+                });
 
-          const devBranch = branches.find(branch => branch.name === 'dev');
-          const qaBranch = branches.find(branch => branch.name === 'qa');
+                const devBranch = branches.find(branch => branch.name === 'dev');
+                const qaBranch = branches.find(branch => branch.name === 'qa');
 
-          const pr = await octokit.pulls.create({
-            owner: process.env.GITHUB_REPOSITORY_OWNER,
-            repo: process.env.GITHUB_REPOSITORY,
-            title: 'Automated Pull Request from Dev to QA',
-            head: devBranch.name,
-            base: qaBranch.name,
-            body: 'This is an automated pull request from the dev branch to the qa branch.'
-          });
+                const pr = await octokit.pulls.create({
+                  owner: process.env.GITHUB_REPOSITORY_OWNER,
+                  repo: process.env.GITHUB_REPOSITORY,
+                  title: 'Automated Pull Request from Dev to QA',
+                  head: devBranch.name,
+                  base: qaBranch.name,
+                  body: 'This is an automated pull request from the dev branch to the qa branch.'
+                });
 
-          console.log(`Pull request created: ${pr.data.html_url}`);
+                console.log(`Pull request created: ${pr.data.html_url}`);
+              } catch (error) {
+                console.error('Error creating pull request:', error);
+                process.exit(1);
+              }
+            }
+
+            createPullRequest();
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
           GITHUB_REPOSITORY: ${{ github.repository }}
