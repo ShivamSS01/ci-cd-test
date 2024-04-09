@@ -19,8 +19,8 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const github = context.github;
-            const { data: branches } = await github.repos.listBranches({
+            const github1 = context.github;
+            const { data: branches } = await github1.repos.listBranches({
               owner: context.repo.owner,
               repo: context.repo.repo,
             });
@@ -28,7 +28,7 @@ jobs:
             const devBranch = branches.find(branch => branch.name === 'dev');
             const qaBranch = branches.find(branch => branch.name === 'qa');
 
-            const pr = await github.pulls.create({
+            const pr = await github1.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
               title: 'Automated Pull Request from Dev to QA',
