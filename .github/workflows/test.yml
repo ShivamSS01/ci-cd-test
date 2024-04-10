@@ -1,16 +1,31 @@
 name: Pull Request Action
- 
 on:
   push:
     branches:
       - dev
- 
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
- 
     steps:
+      - name: Check if PR exists
+        id: check
+        run: |
+          if ! command -v gh &> /dev/null; then
+              echo "Error: 'gh' command not found. Please install GitHub CLI." >&2
+              exit 1
+          fi
+ 
+          prs=$(gh pr list --repo "$GITHUB_REPOSITORY" \
+              --json baseRefName,headRefName \
+              --jq '. | map(select(.baseRefName == "qa" and .headRefName == "dev")) | length')
+ 
+          if ((prs > 0)); then
+              echo "skip=true" >> "$GITHUB_ENV"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create pull request
+        if: steps.check.outputs.skip != 'true'
         uses: actions/github-script@v6
         with:
           script: |
@@ -32,5 +47,3 @@ jobs:
                 issue_number: result.data.number,
                 labels: ['feature', 'automated pr']
             });
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
