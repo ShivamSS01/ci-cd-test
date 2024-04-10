@@ -47,4 +47,3 @@ jobs:
                 issue_number: result.data.number,
                 labels: ['feature', 'automated pr']
             });
-has context menu
