@@ -1,11 +1,14 @@
 name: Pull Request Action
+ 
 on:
   push:
     branches:
       - dev
+ 
 jobs:
   create-pull-request:
     runs-on: ubuntu-latest
+ 
     steps:
       - name: Check if PR exists
         id: check
@@ -24,8 +27,11 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ 
       - name: Create pull request
         if: steps.check.outputs.skip != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
         uses: actions/github-script@v6
         with:
           script: |
